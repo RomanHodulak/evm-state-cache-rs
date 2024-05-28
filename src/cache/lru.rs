@@ -20,6 +20,10 @@ impl<K, V> Cache<K, V> for LruCache<K, V>
 where
     K: Hash + Eq,
 {
+    fn contains(&self, key: &K) -> bool {
+        LruCache::contains(self, key)
+    }
+
     fn read<'a>(&'a mut self, key: &K) -> Option<&'a V> {
         LruCache::get(self, key)
     }

@@ -1,4 +1,6 @@
-use std::collections::HashMap;
+mod cached;
+mod in_memory;
+
 use primitive_types::U256;
 
 pub type Address = [u8; 20];
@@ -11,7 +13,7 @@ pub struct Account {
     storage_root: U256,
 }
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct EvmState {
-    accounts: HashMap<Address, Account>,
+pub trait EvmStateRepository {
+    fn get(&mut self, address: &Address) -> Option<&Account>;
+    fn replace(&mut self, address: Address, account: Account);
 }

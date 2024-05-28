@@ -25,6 +25,6 @@ where
     }
 
     fn write(&mut self, key: K, value: V) {
-        LruCache::get_or_init(self, key, 1, |key| value);
+        LruCache::get_or_init(self, key, 1, |_key| value);
     }
 }
