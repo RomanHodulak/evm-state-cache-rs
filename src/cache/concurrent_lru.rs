@@ -1,4 +1,4 @@
-//! [`Cache`] implementation with Least-Recently-Used eviction policy.
+//! [`Cache`] implementation with Least-Recently-Used eviction policy, optimized for concurrent access.
 //!
 //! # Example
 //! ```
@@ -13,18 +13,18 @@
 //! assert_eq!(actual, "phylax");
 //! ```
 use crate::cache::Cache;
-use lru::LruCache;
+use concurrent_lru::sharded::LruCache;
 use std::hash::Hash;
 
 impl<K, V> Cache<K, V> for LruCache<K, V>
 where
-    K: Hash + Eq,
+    K: Hash + Eq + Clone,
 {
     fn read<'a>(&'a mut self, key: &K) -> Option<&'a V> {
-        LruCache::get(self, key)
+        Some(LruCache::get(self, key.clone())?.value())
     }
 
     fn write(&mut self, key: K, value: V) {
-        LruCache::put(self, key, value);
+        LruCache::get_or_init(self, key, 1, |key| value);
     }
 }
