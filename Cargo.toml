@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 primitive-types = "0.12"
+lru = "0.12"
