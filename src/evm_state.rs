@@ -2,6 +2,10 @@ mod cached;
 mod concurrent_in_memory;
 mod in_memory;
 
+pub use cached::*;
+pub use concurrent_in_memory::*;
+pub use in_memory::*;
+
 use primitive_types::U256;
 
 /// An Ethereum [address] uniquely identifies [`Account`].
@@ -20,6 +24,17 @@ pub struct Account {
     balance: U256,
     code_hash: U256,
     storage_root: U256,
+}
+
+impl Account {
+    pub fn new(nonce: u64, balance: U256, code_hash: U256, storage_root: U256) -> Self {
+        Self {
+            nonce,
+            balance,
+            code_hash,
+            storage_root,
+        }
+    }
 }
 
 /// A trait for objects capable of accessing [EVM state].
