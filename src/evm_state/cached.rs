@@ -1,3 +1,7 @@
+/// A cached implementation of [`EvmStateRepository`].
+///
+/// Wraps a different implementation of [`EvmStateRepository`] and adds a caching layer on top
+/// of it. Primarily, the data is read from cache.
 use crate::cache::Cache;
 use crate::evm_state::{Account, Address, EvmStateRepository};
 
@@ -10,7 +14,7 @@ pub struct CachedEvmStateRepository<InnerRepository: EvmStateRepository, C: Cach
 impl<InnerRepository: EvmStateRepository, C: Cache<Address, Account>> EvmStateRepository
     for CachedEvmStateRepository<InnerRepository, C>
 {
-    fn get(&mut self, address: &Address) -> Option<&Account> {
+    fn get(&mut self, address: &Address) -> Option<Account> {
         if !self.cache.contains(address) {
             self.cache.write(*address, self.inner.get(address)?.clone());
         }
