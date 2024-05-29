@@ -1,4 +1,5 @@
 mod cached;
+mod concurrent_in_memory;
 mod in_memory;
 
 use primitive_types::U256;
