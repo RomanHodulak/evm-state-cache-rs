@@ -1,10 +1,14 @@
 mod cached;
 mod concurrent_in_memory;
 mod in_memory;
+#[cfg(feature = "revm")]
+mod revm;
 
 pub use cached::*;
 pub use concurrent_in_memory::*;
 pub use in_memory::*;
+#[cfg(feature = "revm")]
+pub use revm::*;
 
 use primitive_types::U256;
 
