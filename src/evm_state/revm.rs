@@ -1,12 +1,12 @@
 use crate::evm_state::{Account, Address, EvmStateRepository};
 use primitive_types::U256;
 use revm::primitives::AccountInfo;
-use revm::{Database, DatabaseCommit};
+use revm::{DatabaseCommit, DatabaseRef};
 use std::collections::HashMap;
 
-/// Implements [`EvmStateRepository`] that accesses a [`Database`] used by [`revm`].
+/// Implements [`EvmStateRepository`] that accesses a [`DatabaseRef`] used by [`revm`].
 #[derive(Debug, Clone, PartialEq)]
-pub struct RevmStateRepository<D: Database + DatabaseCommit> {
+pub struct RevmStateRepository<D: DatabaseRef + DatabaseCommit> {
     database: D,
 }
 
@@ -44,10 +44,10 @@ impl From<Account> for revm::primitives::Account {
     }
 }
 
-impl<D: Database + DatabaseCommit> EvmStateRepository for RevmStateRepository<D> {
-    fn get(&mut self, address: &Address) -> Option<Account> {
+impl<D: DatabaseRef + DatabaseCommit> EvmStateRepository for RevmStateRepository<D> {
+    fn get(&self, address: &Address) -> Option<Account> {
         self.database
-            .basic(revm::primitives::Address::from(address))
+            .basic_ref(revm::primitives::Address::from(address))
             .ok()
             .flatten()
             .map(Into::into)
@@ -62,7 +62,7 @@ impl<D: Database + DatabaseCommit> EvmStateRepository for RevmStateRepository<D>
     }
 }
 
-impl<D: Database + DatabaseCommit> RevmStateRepository<D> {
+impl<D: DatabaseRef + DatabaseCommit> RevmStateRepository<D> {
     pub fn new(database: D) -> Self {
         Self { database }
     }
@@ -103,7 +103,7 @@ mod tests {
 
     #[test]
     fn test_account_by_non_existent_address_from_repository_is_not_found() {
-        let mut repository = RevmStateRepository::new(InMemoryDB::default());
+        let repository = RevmStateRepository::new(InMemoryDB::default());
 
         let actual_account = repository.get(&Address::from(H160::zero()));
 

@@ -33,18 +33,18 @@ use evm_state_cache::{CacheBuilder, CachedEvmStateRepository, EvictionPolicy, Ev
 
 // Create cache with provided options
 let cache = CacheBuilder::new()
-    // Provide capacity based on available memory and usage
-    .with_capacity(10)
-    // Pick eviction policy most efficient for your application use-case
-    .with_eviction_policy(EvictionPolicy::LeastRecentlyUsed)
-    // Build cache instance
-    .build();
+// Provide capacity based on available memory and usage
+.with_capacity(10)
+// Pick eviction policy most efficient for your application use-case
+.with_eviction_policy(EvictionPolicy::LeastRecentlyUsed)
+// Build cache instance
+.build();
 
 // Create repository with read/write access to a desired database
 let repository = RevmStateRepository::new(InMemoryDB::default ());
 
 // Combine the repository and cache into the cached repository
-let mut repository = CachedEvmStateRepository::new(repository, cache);
+let repository = CachedEvmStateRepository::new(repository, cache);
 
 // Create an Ethereum address
 let address = [0u8; 20];

@@ -11,7 +11,7 @@ pub struct ConcurrentInMemoryEvmStateRepository {
 }
 
 impl EvmStateRepository for ConcurrentInMemoryEvmStateRepository {
-    fn get(&mut self, address: &Address) -> Option<Account> {
+    fn get(&self, address: &Address) -> Option<Account> {
         self.accounts.get(address).map(|v| v.clone())
     }
 
@@ -54,7 +54,7 @@ mod tests {
 
     #[test]
     fn test_account_by_non_existent_address_from_repository_is_not_found() {
-        let mut repository = ConcurrentInMemoryEvmStateRepository::new();
+        let repository = ConcurrentInMemoryEvmStateRepository::new();
 
         let actual_account = repository.get(&Address::from(H160::zero()));
 

@@ -21,11 +21,11 @@ where
     K: Hash + Eq + Send + Sync + 'static,
     V: Clone + Send + Sync + 'static,
 {
-    fn read(&mut self, key: &K) -> Option<V> {
+    fn read(&self, key: &K) -> Option<V> {
         Moka::get(self, key)
     }
 
-    fn write(&mut self, key: K, value: V) {
+    fn write(&self, key: K, value: V) {
         Moka::insert(self, key, value);
     }
 }

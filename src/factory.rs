@@ -66,7 +66,7 @@ mod tests {
 
     #[test]
     fn test_builder_creates_cache_with_desired_capacity_that_evicts_lru() {
-        let mut cache = CacheBuilder::new()
+        let cache = CacheBuilder::new()
             .with_capacity(1)
             .with_eviction_policy(EvictionPolicy::LeastRecentlyUsed)
             .build();
@@ -95,7 +95,7 @@ mod tests {
 
     #[test]
     fn test_builder_creates_cache_with_desired_capacity_that_evicts_lfu() {
-        let mut cache = CacheBuilder::new()
+        let cache = CacheBuilder::new()
             .with_capacity(1)
             .with_eviction_policy(EvictionPolicy::LeastFrequentlyUsed)
             .build();

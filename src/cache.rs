@@ -1,6 +1,5 @@
 //! A module dedicated to generic [`Cache`] trait and its implementations provided by this crate.
 mod concurrent;
-mod lru;
 
 /// A trait for objects that implement fast key-value storage.
 ///
@@ -19,10 +18,10 @@ mod lru;
 /// method differently if there is a more efficient way to do it or if calling the `read` method
 /// messes with the eviction policy.
 pub trait Cache<K, V> {
-    fn contains(&mut self, key: &K) -> bool {
+    fn contains(&self, key: &K) -> bool {
         self.read(key).is_some()
     }
 
-    fn read(&mut self, key: &K) -> Option<V>;
-    fn write(&mut self, key: K, value: V);
+    fn read(&self, key: &K) -> Option<V>;
+    fn write(&self, key: K, value: V);
 }

@@ -32,7 +32,7 @@
 //! let repository = RevmStateRepository::new(InMemoryDB::default());
 //!
 //! // Combine the repository and cache into the cached repository
-//! let mut repository = CachedEvmStateRepository::new(repository, cache);
+//! let repository = CachedEvmStateRepository::new(repository, cache);
 //!
 //! // Create an Ethereum address
 //! let address = [0u8; 20];

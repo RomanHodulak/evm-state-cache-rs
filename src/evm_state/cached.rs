@@ -19,7 +19,7 @@ pub struct CachedEvmStateRepository<InnerRepository: EvmStateRepository, C: Cach
 impl<InnerRepository: EvmStateRepository, C: Cache<Address, Account>> EvmStateRepository
     for CachedEvmStateRepository<InnerRepository, C>
 {
-    fn get(&mut self, address: &Address) -> Option<Account> {
+    fn get(&self, address: &Address) -> Option<Account> {
         if !self.cache.contains(address) {
             self.cache.write(*address, self.inner.get(address)?.clone());
         }
@@ -49,33 +49,34 @@ mod tests {
     use super::*;
     use crate::InMemoryEvmStateRepository;
     use primitive_types::U256;
+    use std::sync::RwLock;
 
-    struct DummyCache(Account);
+    struct DummyCache(RwLock<Account>);
 
     impl Cache<Address, Account> for DummyCache {
-        fn read(&mut self, _key: &Address) -> Option<Account> {
-            Some(self.0.clone())
+        fn read(&self, _key: &Address) -> Option<Account> {
+            Some(self.0.read().unwrap().clone())
         }
 
-        fn write(&mut self, _key: Address, _value: Account) {}
+        fn write(&self, _key: Address, _value: Account) {}
     }
 
-    struct EmptyCache(Option<Account>);
+    struct EmptyCache(RwLock<Option<Account>>);
 
     impl Cache<Address, Account> for EmptyCache {
-        fn read(&mut self, _key: &Address) -> Option<Account> {
-            self.0.clone()
+        fn read(&self, _key: &Address) -> Option<Account> {
+            self.0.read().unwrap().clone()
         }
 
-        fn write(&mut self, _key: Address, value: Account) {
-            self.0.replace(value);
+        fn write(&self, _key: Address, value: Account) {
+            self.0.write().unwrap().replace(value);
         }
     }
 
     struct NoopEvmRepository;
 
     impl EvmStateRepository for NoopEvmRepository {
-        fn get(&mut self, _address: &Address) -> Option<Account> {
+        fn get(&self, _address: &Address) -> Option<Account> {
             None
         }
 
@@ -86,8 +87,8 @@ mod tests {
     fn test_account_is_primarily_taken_from_cache() {
         let expected_account = Account::new(4, U256::zero(), U256::zero(), U256::zero());
         let repository = NoopEvmRepository;
-        let cache = DummyCache(expected_account.clone());
-        let mut repository = CachedEvmStateRepository::new(repository, cache);
+        let cache = DummyCache(RwLock::new(expected_account.clone()));
+        let repository = CachedEvmStateRepository::new(repository, cache);
 
         let actual_account = repository.get(&[0u8; 20]);
 
@@ -103,8 +104,8 @@ mod tests {
         let expected_account = Account::new(4, U256::zero(), U256::zero(), U256::zero());
         let mut repository = InMemoryEvmStateRepository::new();
         repository.replace([0u8; 20], expected_account.clone());
-        let cache = EmptyCache(None);
-        let mut repository = CachedEvmStateRepository::new(repository, cache);
+        let cache = EmptyCache(RwLock::new(None));
+        let repository = CachedEvmStateRepository::new(repository, cache);
 
         let actual_account = repository.get(&[0u8; 20]);
 
