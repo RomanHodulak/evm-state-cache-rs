@@ -46,3 +46,68 @@ impl CacheBuilder {
             .build()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use primitive_types::U256;
+
+    #[test]
+    fn test_builder_creates_cache_with_desired_capacity_that_evicts_lru() {
+        let mut cache = CacheBuilder::new()
+            .with_capacity(1)
+            .with_eviction_policy(EvictionPolicy::LeastRecentlyUsed)
+            .build();
+        let first_address = [0u8; 20];
+        let first_account = Account::new(0, U256::zero(), U256::zero(), U256::zero());
+        let second_address = [1u8; 20];
+        let second_account = Account::new(1, U256::zero(), U256::zero(), U256::zero());
+
+        cache.write(first_address, first_account);
+        cache.write(second_address, second_account);
+
+        for _ in 0..100 {
+            cache.read(&first_address);
+            cache.read(&second_address);
+        }
+
+        assert!(
+            cache.read(&second_address).is_some(),
+            "Cache does not contain most recently used entry"
+        );
+        assert!(
+            cache.read(&first_address).is_none(),
+            "Cache contains evicted entry"
+        );
+    }
+
+    #[test]
+    fn test_builder_creates_cache_with_desired_capacity_that_evicts_lfu() {
+        let mut cache = CacheBuilder::new()
+            .with_capacity(1)
+            .with_eviction_policy(EvictionPolicy::LeastFrequentlyUsed)
+            .build();
+        let first_address = [0u8; 20];
+        let first_account = Account::new(0, U256::zero(), U256::zero(), U256::zero());
+        let second_address = [1u8; 20];
+        let second_account = Account::new(1, U256::zero(), U256::zero(), U256::zero());
+
+        cache.write(first_address, first_account.clone());
+        cache.write(first_address, first_account);
+        cache.write(second_address, second_account);
+
+        for _ in 0..100 {
+            cache.read(&first_address);
+            cache.read(&second_address);
+        }
+
+        assert!(
+            cache.read(&second_address).is_none(),
+            "Cache contains evicted entry"
+        );
+        assert!(
+            cache.read(&first_address).is_some(),
+            "Cache does not contain most frequently used entry"
+        );
+    }
+}
