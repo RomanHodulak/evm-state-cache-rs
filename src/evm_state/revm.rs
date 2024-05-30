@@ -64,23 +64,21 @@ impl<D: Database + DatabaseCommit> EvmStateRepository for RevmStateRepository<D>
     }
 }
 
+impl<D: Database + DatabaseCommit> RevmStateRepository<D> {
+    pub fn new(database: D) -> Self {
+        Self { database }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use primitive_types::H160;
     use revm::InMemoryDB;
 
-    impl RevmStateRepository<InMemoryDB> {
-        fn new() -> Self {
-            Self {
-                database: Default::default(),
-            }
-        }
-    }
-
     #[test]
     fn test_account_by_existent_address_from_repository_is_found() {
-        let mut repository = RevmStateRepository::new();
+        let mut repository = RevmStateRepository::new(InMemoryDB::default());
 
         repository.replace(
             Address::from(H160::zero()),
@@ -107,7 +105,7 @@ mod tests {
 
     #[test]
     fn test_account_by_non_existent_address_from_repository_is_not_found() {
-        let mut repository = RevmStateRepository::new();
+        let mut repository = RevmStateRepository::new(InMemoryDB::default());
 
         let actual_account = repository.get(&Address::from(H160::zero()));
 
