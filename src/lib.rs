@@ -40,7 +40,7 @@
 //! // Load account by given address
 //! let account = repository.get(&address);
 //!
-//! // Enjoy loading from a fast, concurrent cache in every subsequent calls for the cached address
+//! // Enjoy loading from a fast, concurrent cache in subsequent calls for the cached address
 //! ```
 
 mod cache;

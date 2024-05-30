@@ -1,12 +1,10 @@
-/// Simple, single-threaded in-memory implementation of [`EvmStateRepository`].
-///
-/// All data is kept in-memory and accessed from a single thread.
 use crate::evm_state::{Account, Address, EvmStateRepository};
 use primitive_types::U256;
 use revm::primitives::AccountInfo;
 use revm::{Database, DatabaseCommit};
 use std::collections::HashMap;
 
+/// Implements [`EvmStateRepository`] that accesses a [`Database`] used by [`revm`].
 #[derive(Debug, Clone, PartialEq)]
 pub struct RevmStateRepository<D: Database + DatabaseCommit> {
     database: D,

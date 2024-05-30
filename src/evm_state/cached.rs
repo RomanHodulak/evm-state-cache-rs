@@ -5,6 +5,11 @@
 use crate::cache::Cache;
 use crate::evm_state::{Account, Address, EvmStateRepository};
 
+/// An [`EvmStateRepository`] that uses a different repository to access the data and adds a layer
+/// of [`Cache`] on top of it.
+///
+/// This implementation is capable of working while primarily keeping the cache updated and
+/// accessed first, before the underlying repository.  
 pub struct CachedEvmStateRepository<InnerRepository: EvmStateRepository, C: Cache<Address, Account>>
 {
     cache: C,

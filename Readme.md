@@ -13,10 +13,10 @@ Implementations provided by this crate include:
 * In-memory concurrent multithreaded ideal for benchmarking.
 * Rust EVM database compatible.
 
-# Usage
+## Usage
 
 > [!NOTE]  
-> The crate is currently not published to crates.io, therefore these instructions are currently invalid.
+> The crate is not published to crates.io, therefore these instructions are currently invalid.
 
 To add `evm-state-cache` you can run the `cargo add` command as following:
 
@@ -25,7 +25,7 @@ To add `evm-state-cache` you can run the `cargo add` command as following:
 cargo add evm-state-cache --features revm
 ```
 
-# Example
+## Example
 
 ```rust
 use revm::InMemoryDB;
@@ -33,12 +33,12 @@ use evm_state_cache::{CacheBuilder, CachedEvmStateRepository, EvictionPolicy, Ev
 
 // Create cache with provided options
 let cache = CacheBuilder::new()
-// Provide capacity based on available memory and usage
-.with_capacity(10)
-// Pick eviction policy most efficient for your application use-case
-.with_eviction_policy(EvictionPolicy::LeastRecentlyUsed)
-// Build cache instance
-.build();
+    // Provide capacity based on available memory and usage
+    .with_capacity(10)
+    // Pick eviction policy most efficient for your application use-case
+    .with_eviction_policy(EvictionPolicy::LeastRecentlyUsed)
+    // Build cache instance
+    .build();
 
 // Create repository with read/write access to a desired database
 let repository = RevmStateRepository::new(InMemoryDB::default ());
@@ -52,10 +52,10 @@ let address = [0u8; 20];
 // Load account by given address
 let account = repository.get( & address);
 
-// Enjoy loading from a fast, concurrent cache in every subsequent calls for the cached address
+// Enjoy loading from a fast, concurrent cache in subsequent calls for the cached address
 ```
 
-# Minimum supported Rust versions
+## Minimum supported Rust versions
 
 The crate's minimum supported Rust versions (MSRV) are the followings:
 
@@ -64,9 +64,9 @@ The crate's minimum supported Rust versions (MSRV) are the followings:
 | default features | Rust 1.65.0 (Nov 3, 2022) |
 | `revm`           | Rust 1.65.0 (Nov 3, 2022) |
 
-# Library concepts
+## Library concepts
 
-## EVM state
+### EVM state
 
 In the context of Ethereum, the state is an enormous data structure called
 a [modified Merkle Patricia Trie](https://ethereum.org/en/developers/docs/data-structures-and-encoding/patricia-merkle-trie/),
@@ -80,7 +80,7 @@ always: `keccak256(ethereumAddress)` and a `value` is always: `rlp(ethereumAccou
 ethereum `account` is a 4 item array of `[nonce,balance,storageRoot,codeHash]`. At this point, it's worth noting that
 this `storageRoot` is the root of another patricia trie: the storage trie
 
-## Cache
+### Cache
 
 Cache holds data in-memory for fast retrieval, limited to a certain maximum number of entries. When the maximum amount
 of entries is reached, a number of elements must be evicted from the cache. To determine which elements are deemed to be

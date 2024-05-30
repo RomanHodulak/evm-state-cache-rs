@@ -1,3 +1,4 @@
+//! A module dedicated for EVM state entities and a read/write access trait.
 mod cached;
 mod concurrent_in_memory;
 mod in_memory;
@@ -45,6 +46,9 @@ impl Account {
 ///
 /// [EVM state]: https://ethereum.org/en/developers/docs/evm/#state
 pub trait EvmStateRepository {
+    /// Tries to read [`Account`] and returns [`Some`] if it exists.
     fn get(&mut self, address: &Address) -> Option<Account>;
+
+    /// Writes `account` associated with the `address` regardless whether or not it exists.
     fn replace(&mut self, address: Address, account: Account);
 }

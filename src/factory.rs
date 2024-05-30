@@ -1,9 +1,17 @@
+//! A module that provides creation responsible interfaces.
 use crate::cache::Cache;
 use crate::evm_state::{Account, Address};
 
+/// The eviction (and admission) policy of a cache.
+///
+/// When the cache is full, the eviction/ admission policy is used to determine which items
+/// should be admitted to the cache and which cached items should be evicted. The choice of
+/// a policy will directly affect the performance (hit rate) of the cache.
 #[derive(Debug)]
 pub enum EvictionPolicy {
+    /// A policy that evicts entries that were used most recently.
     LeastRecentlyUsed,
+    /// A policy that evicts entries that are being used the most.
     LeastFrequentlyUsed,
 }
 
@@ -16,6 +24,7 @@ impl From<EvictionPolicy> for moka::policy::EvictionPolicy {
     }
 }
 
+/// Responsible for constructing [`Cache`] while providing various configuration parameters.
 #[derive(Debug)]
 pub struct CacheBuilder {
     capacity: usize,
@@ -30,16 +39,19 @@ impl CacheBuilder {
         }
     }
 
+    /// Sets the eviction (and admission) policy of the cache.
     pub fn with_eviction_policy(mut self, policy: EvictionPolicy) -> Self {
         self.policy = policy;
         self
     }
 
+    /// Sets the maximum `capacity` of entries that the cache holds.
     pub fn with_capacity(mut self, capacity: usize) -> Self {
         self.capacity = capacity;
         self
     }
 
+    /// Builds a [`Cache`] implementation according to parameters set on the builder.
     pub fn build(self) -> impl Cache<Address, Account> {
         moka::sync::CacheBuilder::new(self.capacity as u64)
             .eviction_policy(self.policy.into())

@@ -4,6 +4,7 @@
 use crate::evm_state::{Account, Address, EvmStateRepository};
 use dashmap::DashMap;
 
+/// In-memory concurrent multithreaded ideal for benchmarking.
 #[derive(Debug, Clone)]
 pub struct ConcurrentInMemoryEvmStateRepository {
     accounts: DashMap<Address, Account>,

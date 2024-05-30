@@ -4,6 +4,7 @@
 use crate::evm_state::{Account, Address, EvmStateRepository};
 use std::collections::HashMap;
 
+/// In-memory single-threaded ideal for testing.
 #[derive(Debug, Clone, PartialEq)]
 pub struct InMemoryEvmStateRepository {
     accounts: HashMap<Address, Account>,
