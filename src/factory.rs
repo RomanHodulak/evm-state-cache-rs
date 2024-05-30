@@ -31,12 +31,18 @@ pub struct CacheBuilder {
     policy: EvictionPolicy,
 }
 
-impl CacheBuilder {
-    pub fn new() -> Self {
+impl Default for CacheBuilder {
+    fn default() -> Self {
         Self {
             capacity: 10,
             policy: EvictionPolicy::LeastRecentlyUsed,
         }
+    }
+}
+
+impl CacheBuilder {
+    pub fn new() -> Self {
+        Self::default()
     }
 
     /// Sets the eviction (and admission) policy of the cache.

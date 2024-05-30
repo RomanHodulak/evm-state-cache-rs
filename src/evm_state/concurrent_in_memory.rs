@@ -5,7 +5,7 @@ use crate::evm_state::{Account, Address, EvmStateRepository};
 use dashmap::DashMap;
 
 /// In-memory concurrent multithreaded ideal for benchmarking.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct ConcurrentInMemoryEvmStateRepository {
     accounts: DashMap<Address, Account>,
 }
@@ -20,14 +20,6 @@ impl EvmStateRepository for ConcurrentInMemoryEvmStateRepository {
     }
 }
 
-impl ConcurrentInMemoryEvmStateRepository {
-    pub fn new() -> Self {
-        Self {
-            accounts: DashMap::new(),
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -35,7 +27,7 @@ mod tests {
 
     #[test]
     fn test_account_by_existent_address_from_repository_is_found() {
-        let mut repository = ConcurrentInMemoryEvmStateRepository::new();
+        let mut repository = ConcurrentInMemoryEvmStateRepository::default();
 
         repository.replace(
             Address::from(H160::zero()),
@@ -54,7 +46,7 @@ mod tests {
 
     #[test]
     fn test_account_by_non_existent_address_from_repository_is_not_found() {
-        let repository = ConcurrentInMemoryEvmStateRepository::new();
+        let repository = ConcurrentInMemoryEvmStateRepository::default();
 
         let actual_account = repository.get(&Address::from(H160::zero()));
 

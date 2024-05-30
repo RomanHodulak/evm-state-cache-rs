@@ -5,7 +5,7 @@ use crate::evm_state::{Account, Address, EvmStateRepository};
 use std::collections::HashMap;
 
 /// In-memory single-threaded ideal for testing.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct InMemoryEvmStateRepository {
     accounts: HashMap<Address, Account>,
 }
@@ -20,14 +20,6 @@ impl EvmStateRepository for InMemoryEvmStateRepository {
     }
 }
 
-impl InMemoryEvmStateRepository {
-    pub fn new() -> Self {
-        Self {
-            accounts: HashMap::new(),
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -35,7 +27,7 @@ mod tests {
 
     #[test]
     fn test_account_by_existent_address_from_repository_is_found() {
-        let mut repository = InMemoryEvmStateRepository::new();
+        let mut repository = InMemoryEvmStateRepository::default();
 
         repository.replace(
             Address::from(H160::zero()),
@@ -54,7 +46,7 @@ mod tests {
 
     #[test]
     fn test_account_by_non_existent_address_from_repository_is_not_found() {
-        let repository = InMemoryEvmStateRepository::new();
+        let repository = InMemoryEvmStateRepository::default();
 
         let actual_account = repository.get(&Address::from(H160::zero()));
 

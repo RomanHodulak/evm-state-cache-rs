@@ -102,7 +102,7 @@ mod tests {
     #[test]
     fn test_account_is_loaded_from_repository_when_cache_misses() {
         let expected_account = Account::new(4, U256::zero(), U256::zero(), U256::zero());
-        let mut repository = InMemoryEvmStateRepository::new();
+        let mut repository = InMemoryEvmStateRepository::default();
         repository.replace([0u8; 20], expected_account.clone());
         let cache = EmptyCache(RwLock::new(None));
         let repository = CachedEvmStateRepository::new(repository, cache);
