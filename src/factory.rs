@@ -1,6 +1,8 @@
 //! A module that provides creation responsible interfaces.
 use crate::cache::Cache;
 use crate::evm_state::{Account, Address};
+use std::fmt::Debug;
+use std::marker::PhantomData;
 
 /// The eviction (and admission) policy of a cache.
 ///
@@ -24,44 +26,70 @@ impl From<EvictionPolicy> for moka::policy::EvictionPolicy {
     }
 }
 
+#[derive(Debug, Default)]
+pub struct WithCapacity<T: Debug + Default>(PhantomData<T>);
+
+#[derive(Debug, Default)]
+pub struct WithPolicy<T: Debug + Default>(PhantomData<T>);
+
 /// Responsible for constructing [`Cache`] while providing various configuration parameters.
-#[derive(Debug)]
-pub struct CacheBuilder {
-    capacity: usize,
-    policy: EvictionPolicy,
+#[derive(Debug, Default)]
+pub struct CacheBuilder<State> {
+    _phantom: PhantomData<State>,
+    capacity: Option<usize>,
+    policy: Option<EvictionPolicy>,
 }
 
-impl Default for CacheBuilder {
-    fn default() -> Self {
-        Self {
-            capacity: 10,
-            policy: EvictionPolicy::LeastRecentlyUsed,
-        }
-    }
-}
-
-impl CacheBuilder {
+impl CacheBuilder<()> {
     pub fn new() -> Self {
         Self::default()
     }
+}
 
+impl<State: Debug + Default> CacheBuilder<State> {
     /// Sets the eviction (and admission) policy of the cache.
-    pub fn with_eviction_policy(mut self, policy: EvictionPolicy) -> Self {
-        self.policy = policy;
-        self
+    pub fn with_eviction_policy(
+        mut self,
+        policy: EvictionPolicy,
+    ) -> CacheBuilder<WithPolicy<State>> {
+        self.policy.replace(policy);
+
+        CacheBuilder::<WithPolicy<State>> {
+            _phantom: PhantomData,
+            capacity: self.capacity,
+            policy: self.policy,
+        }
     }
 
     /// Sets the maximum `capacity` of entries that the cache holds.
-    pub fn with_capacity(mut self, capacity: usize) -> Self {
-        self.capacity = capacity;
-        self
+    pub fn with_capacity(mut self, capacity: usize) -> CacheBuilder<WithCapacity<State>> {
+        self.capacity.replace(capacity);
+
+        CacheBuilder::<WithCapacity<State>> {
+            _phantom: PhantomData,
+            capacity: self.capacity,
+            policy: self.policy,
+        }
     }
 
+    fn build_inner(self) -> impl Cache<Address, Account> {
+        moka::sync::CacheBuilder::new(self.capacity.expect("Parameters are filled-in") as u64)
+            .eviction_policy(self.policy.expect("Parameters are filled-in").into())
+            .build()
+    }
+}
+
+impl CacheBuilder<WithPolicy<WithCapacity<()>>> {
     /// Builds a [`Cache`] implementation according to parameters set on the builder.
     pub fn build(self) -> impl Cache<Address, Account> {
-        moka::sync::CacheBuilder::new(self.capacity as u64)
-            .eviction_policy(self.policy.into())
-            .build()
+        self.build_inner()
+    }
+}
+
+impl CacheBuilder<WithCapacity<WithPolicy<()>>> {
+    /// Builds a [`Cache`] implementation according to parameters set on the builder.
+    pub fn build(self) -> impl Cache<Address, Account> {
+        self.build_inner()
     }
 }
 

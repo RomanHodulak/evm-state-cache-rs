@@ -49,4 +49,4 @@ mod factory;
 
 pub use cache::*;
 pub use evm_state::*;
-pub use factory::*;
+pub use factory::{CacheBuilder, EvictionPolicy};
