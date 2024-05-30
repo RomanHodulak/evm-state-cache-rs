@@ -26,12 +26,6 @@ impl From<EvictionPolicy> for moka::policy::EvictionPolicy {
     }
 }
 
-#[derive(Debug, Default)]
-pub struct WithCapacity<T: Debug + Default>(PhantomData<T>);
-
-#[derive(Debug, Default)]
-pub struct WithPolicy<T: Debug + Default>(PhantomData<T>);
-
 /// Responsible for constructing [`Cache`] while providing various configuration parameters.
 #[derive(Debug, Default)]
 pub struct CacheBuilder<State> {
@@ -71,25 +65,32 @@ impl<State: Debug + Default> CacheBuilder<State> {
             policy: self.policy,
         }
     }
+}
 
-    fn build_inner(self) -> impl Cache<Address, Account> {
+#[derive(Debug, Default)]
+pub struct WithCapacity<T: Debug + Default>(PhantomData<T>);
+
+#[derive(Debug, Default)]
+pub struct WithPolicy<T: Debug + Default>(PhantomData<T>);
+
+pub trait HasPolicy {}
+pub trait HasCapacity {}
+
+impl HasPolicy for WithPolicy<()> {}
+impl HasCapacity for WithCapacity<()> {}
+impl<State: Debug + Default + HasPolicy> HasCapacity for WithCapacity<State> {}
+impl<State: Debug + Default + HasPolicy> HasPolicy for WithCapacity<State> {}
+impl<State: Debug + Default + HasCapacity> HasPolicy for WithPolicy<State> {}
+impl<State: Debug + Default + HasCapacity> HasCapacity for WithPolicy<State> {}
+impl<State: Debug + Default + HasPolicy> HasPolicy for CacheBuilder<State> {}
+impl<State: Debug + Default + HasCapacity> HasCapacity for CacheBuilder<State> {}
+
+impl<State: Debug + Default + HasCapacity + HasPolicy> CacheBuilder<State> {
+    /// Builds a [`Cache`] implementation according to parameters set on the builder.
+    pub fn build(self) -> impl Cache<Address, Account> {
         moka::sync::CacheBuilder::new(self.capacity.expect("Parameters are filled-in") as u64)
             .eviction_policy(self.policy.expect("Parameters are filled-in").into())
             .build()
-    }
-}
-
-impl CacheBuilder<WithPolicy<WithCapacity<()>>> {
-    /// Builds a [`Cache`] implementation according to parameters set on the builder.
-    pub fn build(self) -> impl Cache<Address, Account> {
-        self.build_inner()
-    }
-}
-
-impl CacheBuilder<WithCapacity<WithPolicy<()>>> {
-    /// Builds a [`Cache`] implementation according to parameters set on the builder.
-    pub fn build(self) -> impl Cache<Address, Account> {
-        self.build_inner()
     }
 }
 
@@ -130,8 +131,8 @@ mod tests {
     #[test]
     fn test_builder_creates_cache_with_desired_capacity_that_evicts_lfu() {
         let cache = CacheBuilder::new()
-            .with_capacity(1)
             .with_eviction_policy(EvictionPolicy::LeastFrequentlyUsed)
+            .with_capacity(1)
             .build();
         let first_address = [0u8; 20];
         let first_account = Account::new(0, U256::zero(), U256::zero(), U256::zero());
