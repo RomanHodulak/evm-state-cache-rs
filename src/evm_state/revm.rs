@@ -54,11 +54,7 @@ impl<D: DatabaseRef + DatabaseCommit> EvmStateRepository for RevmStateRepository
     }
 
     fn replace(&mut self, address: Address, account: Account) {
-        self.database.commit({
-            let mut map = HashMap::new();
-            map.insert(address.into(), account.into());
-            map
-        });
+        self.database.commit(HashMap::from_iter([(address.into(), account.into())]));
     }
 }
 
