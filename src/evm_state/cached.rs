@@ -20,11 +20,15 @@ impl<InnerRepository: EvmStateRepository, C: Cache<Address, Account>> EvmStateRe
     for CachedEvmStateRepository<InnerRepository, C>
 {
     fn get(&self, address: &Address) -> Option<Account> {
-        if !self.cache.contains(address) {
-            self.cache.write(*address, self.inner.get(address)?.clone());
+        if let Some(hit) = self.cache.read(address) {
+            return Some(hit);
         }
 
-        self.cache.read(address)
+        let account = self.inner.get(address)?;
+
+        self.cache.write(*address, account.clone());
+
+        Some(account)
     }
 
     fn replace(&mut self, address: Address, account: Account) {
